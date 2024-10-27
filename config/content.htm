@@ -127,99 +127,120 @@ var viewer3d;
 <hr/>
 <p>利用 Solvespace 繪製列表中零件的操作過程與說明影片如下:</p>
 <p style="padding-left: 30px;">影片標題: 國立虎尾科技大學機械設計工程系電腦輔助設計與實習- 作業一之一</p>
-<p style="padding-left: 30px;">影片標題: 國立虎尾科技大學機械設計工程系電腦輔助設計與實習- 作業一之二</p>
 <script src="/static/jsc3d.js" type="text/javascript"></script>
-<p><canvas height="600" id="cv" style="border: 1px solid;" width="800"></canvas></p>
-<div style="width: 800px; height: 70px; border: 1px solid;">Model Color:<input id="mdlClr" onchange="changeOption('ModelColor',this.value)" style="margin-right: 50px;" type="color" value="#00ff40"/> Back Color1:<input id="bckClr1" onchange="changeOption('BackgroundColor1',this.value)" style="margin-right: 50px;" type="color"/> Back Color2:<input id="bckClr2" onchange="changeOption('BackgroundColor2',this.value)" type="color"/><br/> Render Mode:<select id="render" onchange="changeOption('RenderMode',this.value)">
+<div id="models1"><canvas height="300" id="cv1" style="border: 1px solid;" width="400"></canvas></div>
+<div style="width: 400px; height: 70px; border: 1px solid; margin-bottom: 20px;"><!-- 調整 margin-bottom --> Model Color:<input id="mdlClr1" onchange="changeOption1('ModelColor',this.value)" style="margin-right: 50px;" type="color" value="#00ff40"/> Back Color1:<input id="bckClr1_1" onchange="changeOption1('BackgroundColor1',this.value)" style="margin-right: 50px;" type="color"/> Back Color2:<input id="bckClr1_2" onchange="changeOption1('BackgroundColor2',this.value)" type="color"/><br/> Render Mode:<select id="render1" onchange="changeOption1('RenderMode',this.value)">
 <option>Flat</option>
 <option>Point</option>
 <option>Wireframe</option>
 <option>Smooth</option>
-</select>Definition:<select id="defini" onchange="changeOption('Definition',this.value)">
+</select>Definition:<select id="defini1" onchange="changeOption1('Definition',this.value)">
 <option>Standard</option>
 <option>low</option>
 <option>high</option>
 </select></div>
 <script type="text/javascript">
-var viewer3d;
-    function getOptions(){
-        var mc = document.getElementById("mdlClr").value;
-        var bc1 = document.getElementById("bckClr1").value;
-        var bc2 = document.getElementById("bckClr2").value;
-        var ren = document.getElementById("render").value;
-        var def = document.getElementById("defini").value;
-        return {ModelColor: mc,
-                BackgroundColor1: bc1,
-                BackgroundColor2: bc2,
-                RenderMode: ren,
-                Definition: def};
-    }
-    function readSTLfile(opt){
-        var canvas = document.getElementById('cv');
-        viewer3d = new JSC3D.Viewer(canvas);
-        viewer3d.setParameter('SceneUrl', opt.SceneUrl);
-        viewer3d.setParameter('InitRotationX', 0);
-        viewer3d.setParameter('InitRotationY', 0);
-        viewer3d.setParameter('InitRotationZ', 0);
-        viewer3d.setParameter('ModelColor', opt.ModelColor);
-        viewer3d.setParameter('BackgroundColor1', opt.BackgroundColor1);
-        viewer3d.setParameter('BackgroundColor2', opt.BackgroundColor2);
-        viewer3d.setParameter('RenderMode', opt.RenderMode);
-        viewer3d.setParameter('Definition', opt.Definition);
-        viewer3d.init();
-        viewer3d.update();
-    }
-    function changeOption(strOpt,strValue){
-    console.log("change " + strOpt + " to " + strValue);
-        viewer3d.setParameter(strOpt, strValue);
-        viewer3d.init();
-        viewer3d.update();
-    }
-    function openByUrl(){
-        var url = document.getElementById("url").value;
-        var opt = getOptions();
-        opt.SceneUrl = document.getElementById("url").value;
-        readSTLfile(opt);
-    }
-    function openByPass(){
-        var pass = document.getElementById("url").value;
-        var opt = getOptions();
-        var fs = document.getElementById("pass").files;
-        var f = fs[0];
-        var reader = new FileReader();
-        reader.onload = (function(theFile) {
-            return function(e) {            
-                opt.SceneUrl = e.target.result;
-                console.log(opt.SceneUrl);
-                readSTLfile(opt);
-            };
-        })(f);
-        reader.readAsDataURL(f);
-    }
-    function openByGet(){
-        var url = "https://s104.cycu.org/~41223122/41223122_part4.stl";
-        var opt = getOptions();
-        opt.SceneUrl = url;
-        readSTLfile(opt);
-    }
-    function GetQueryString(){
-        if( 1 < window.location.search.length )
-        {
-            var query = window.location.search.substring( 1 );
-            var parameters = query.split( '&' );
-            var result = new Object();
-            for( var i = 0; i < parameters.length; i++ )
-            {
-                var element = parameters[ i ].split( '=' );
-                var paramName = decodeURIComponent( element[ 0 ] );
-                var paramValue = decodeURIComponent( element[ 1 ] );
-                result[ paramName ] = decodeURIComponent( paramValue );
-            }
-            return result;
-        }
-        return null;
-    }
-    openByGet();
+// PART 1 的變數和函數
+var viewer1;
+
+function getOptions1(){
+    var mc = document.getElementById("mdlClr1").value;
+    var bc1 = document.getElementById("bckClr1_1").value;
+    var bc2 = document.getElementById("bckClr1_2").value;
+    var ren = document.getElementById("render1").value;
+    var def = document.getElementById("defini1").value;
+    return {ModelColor: mc, BackgroundColor1: bc1, BackgroundColor2: bc2, RenderMode: ren, Definition: def};
+}
+
+function readSTLfile1(opt, canvasId){
+    var canvas = document.getElementById(canvasId);
+    viewer1 = new JSC3D.Viewer(canvas);
+    viewer1.setParameter('SceneUrl', opt.SceneUrl);
+    viewer1.setParameter('InitRotationX', 0);
+    viewer1.setParameter('InitRotationY', 0);
+    viewer1.setParameter('InitRotationZ', 0);
+    viewer1.setParameter('ModelColor', opt.ModelColor);
+    viewer1.setParameter('BackgroundColor1', opt.BackgroundColor1);
+    viewer1.setParameter('BackgroundColor2', opt.BackgroundColor2);
+    viewer1.setParameter('RenderMode', opt.RenderMode);
+    viewer1.setParameter('Definition', opt.Definition);
+    viewer1.init();
+    viewer1.update();
+}
+
+function changeOption1(strOpt, strValue){
+    console.log("PART 1 change " + strOpt + " to " + strValue);
+    viewer1.setParameter(strOpt, strValue);
+    viewer1.init();
+    viewer1.update();
+}
+
+function openByGet1(){
+    var url = "https://s104.cycu.org/~41223122/41223122_part2.stl";
+    var opt = getOptions1();
+    opt.SceneUrl = url;
+    readSTLfile1(opt, 'cv1');
+}
+
+openByGet1();
+</script>
+<p style="padding-left: 30px;">影片標題: 國立虎尾科技大學機械設計工程系電腦輔助設計與實習- 作業一之二</p>
+<script src="/static/jsc3d.js" type="text/javascript"></script>
+<div id="models2"><canvas height="300" id="cv2" style="border: 1px solid;" width="400"></canvas></div>
+<div style="width: 400px; height: 70px; border: 1px solid; margin-bottom: 20px;"><!-- 調整 margin-bottom --> Model Color:<input id="mdlClr2" onchange="changeOption2('ModelColor',this.value)" style="margin-right: 50px;" type="color" value="#00ff40"/> <!-- 初始綠色 --> Back Color1:<input id="bckClr2_1" onchange="changeOption2('BackgroundColor1',this.value)" style="margin-right: 50px;" type="color"/> Back Color2:<input id="bckClr2_2" onchange="changeOption2('BackgroundColor2',this.value)" type="color"/><br/> Render Mode:<select id="render2" onchange="changeOption2('RenderMode',this.value)">
+<option>Flat</option>
+<option>Point</option>
+<option>Wireframe</option>
+<option>Smooth</option>
+</select>Definition:<select id="defini2" onchange="changeOption2('Definition',this.value)">
+<option>Standard</option>
+<option>low</option>
+<option>high</option>
+</select></div>
+<script type="text/javascript">
+// PART 2 的變數和函數
+var viewer2;
+
+function getOptions2(){
+    var mc = document.getElementById("mdlClr2").value;
+    var bc1 = document.getElementById("bckClr2_1").value;
+    var bc2 = document.getElementById("bckClr2_2").value;
+    var ren = document.getElementById("render2").value;
+    var def = document.getElementById("defini2").value;
+    return {ModelColor: mc, BackgroundColor1: bc1, BackgroundColor2: bc2, RenderMode: ren, Definition: def};
+}
+
+function readSTLfile2(opt, canvasId){
+    var canvas = document.getElementById(canvasId);
+    viewer2 = new JSC3D.Viewer(canvas);
+    viewer2.setParameter('SceneUrl', opt.SceneUrl);
+    viewer2.setParameter('InitRotationX', 0);
+    viewer2.setParameter('InitRotationY', 0);
+    viewer2.setParameter('InitRotationZ', 0);
+    viewer2.setParameter('ModelColor', opt.ModelColor);
+    viewer2.setParameter('BackgroundColor1', opt.BackgroundColor1);
+    viewer2.setParameter('BackgroundColor2', opt.BackgroundColor2);
+    viewer2.setParameter('RenderMode', opt.RenderMode);
+    viewer2.setParameter('Definition', opt.Definition);
+    viewer2.init();
+    viewer2.update();
+}
+
+function changeOption2(strOpt, strValue){
+    console.log("PART 2 change " + strOpt + " to " + strValue);
+    viewer2.setParameter(strOpt, strValue);
+    viewer2.init();
+    viewer2.update();
+}
+
+function openByGet2(){
+    var url = "https://s104.cycu.org/~41223122/41223122_part4.stl";
+    var opt = getOptions2();
+    opt.SceneUrl = url;
+    readSTLfile2(opt, 'cv2');
+}
+
+openByGet2();
 </script>
 <p></p>
 <p><iframe allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen="allowfullscreen" frameborder="0" height="315" referrerpolicy="strict-origin-when-cross-origin" src="https://www.youtube.com/embed/KkipAeVs4Sw?si=u2KKkTL81xjuBx5r" title="YouTube video player" width="560"></iframe></p>
