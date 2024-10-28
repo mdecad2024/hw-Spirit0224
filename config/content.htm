@@ -36,7 +36,7 @@
 <div id="modelParts1"></div>
 <script type="text/javascript">
 // 函數用來動態生成模型部件
-function createModelPart(index, url, ytUrl, title, downloadUrl) {
+function createModelPart(index, url, ytUrl, title) {
     var modelPartDiv = document.createElement('div');
     modelPartDiv.innerHTML = `
         <h3>${title}</h3> <!-- 題目標題 -->
@@ -63,12 +63,6 @@ function createModelPart(index, url, ytUrl, title, downloadUrl) {
         
         <div id="videoPlaceholder${index}" style="margin-bottom: 20px;">
             <iframe width="560" height="315" src="${ytUrl}" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
-        </div>
-        
-        <div id="downloadSection${index}" style="margin-bottom: 20px;">
-            <a href="${downloadUrl}" download>
-                <button style="padding: 10px 20px; font-size: 16px;">下載檔案</button>
-            </a>
         </div>
     `;
     document.getElementById('modelParts1').appendChild(modelPartDiv);
@@ -121,24 +115,16 @@ function createModelPart(index, url, ytUrl, title, downloadUrl) {
 function initModelParts() {
     var links = document.querySelectorAll('#modelLinks1 a');
     var ytLinks = [
-        'https://www.youtube.com/embed/r8UurR8XOkM', // 測試題的影片
+       'https://www.youtube.com/embed/r8UurR8XOkM', // 測試題的影片
         'https://www.youtube.com/embed/KkipAeVs4Sw', // 第一題的影片
         'https://www.youtube.com/embed/dSXBk1qFFjs' ,// 第二題的影片
         'https://www.youtube.com/embed/2sHDIOemkiU', // 第三題的影片
     ];
     
     var titles = ['測試題', '第一題', '第二題', '第三題']; // 題目標題
-
-    // 完整的下載連結
-    var downloadLinks = [
-        'https://s104.cycu.org/~41223122/41223122_part2.stl', // 測試題的下載檔案
-        'https://s104.cycu.org/~41223122/41223122_part4.stl', // 第一題的下載檔案
-        'https://s104.cycu.org/~41223122/41223122_part5.stl', // 第二題的下載檔案
-        'https://s104.cycu.org/~41223122/41223122_part6.stl', // 第三題的下載檔案
-    ];
     
     links.forEach(function(link, index) {
-        createModelPart(index + 1, link.href, ytLinks[index % ytLinks.length], titles[index], downloadLinks[index]); // 添加下載連結
+        createModelPart(index + 1, link.href, ytLinks[index % ytLinks.length], titles[index]); // 將標題傳遞進去
     });
 }
 
