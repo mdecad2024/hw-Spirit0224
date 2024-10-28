@@ -145,188 +145,106 @@ img.add_border {
 <p>測試題</p>
 <p></p>
 <script src="./../cmsimde/static/jsc3d.js" type="text/javascript"></script>
-<div id="models1"><canvas height="300" id="cv1" style="border: 1px solid;" width="400"></canvas></div>
-<div style="width: 400px; height: 70px; border: 1px solid; margin-bottom: 20px;"><!-- 調整 margin-bottom --> Model Color:<input id="mdlClr1" onchange="changeOption1('ModelColor',this.value)" style="margin-right: 50px;" type="color" value="#00ff40"/> Back Color1:<input id="bckClr1_1" onchange="changeOption1('BackgroundColor1',this.value)" style="margin-right: 50px;" type="color"/> Back Color2:<input id="bckClr1_2" onchange="changeOption1('BackgroundColor2',this.value)" type="color"/><br/> Render Mode:<select id="render1" onchange="changeOption1('RenderMode',this.value)">
-<option>Flat</option>
-<option>Point</option>
-<option>Wireframe</option>
-<option>Smooth</option>
-</select>Definition:<select id="defini1" onchange="changeOption1('Definition',this.value)">
-<option>Standard</option>
-<option>low</option>
-<option>high</option>
-</select></div>
+<!-- 模型連結 -->
+<div id="modelLinks1" style="display: none;"><a href="https://s104.cycu.org/~41223122/41223122_part2.stl">模型0</a> <!-- 測試題的模型 --> <a href="https://s104.cycu.org/~41223122/41223122_part4.stl">模型1</a> <!-- 第一題的模型 --> <a href="https://s104.cycu.org/~41223122/41223122_part5.stl">模型2</a> <!-- 第二題的模型 --> <a href="https://s104.cycu.org/~41223122/41223122_part6.stl">模型3</a> <!-- 第三題的模型 --></div>
+<!-- 動態生成的模型部分 -->
+<div id="modelParts1"></div>
 <script type="text/javascript">
-// PART 1 的變數和函數
-var viewer1;
+// 函數用來動態生成模型部件
+function createModelPart(index, url, ytUrl, title) {
+    var modelPartDiv = document.createElement('div');
+    modelPartDiv.innerHTML = `
+        <h3>${title}</h3> <!-- 題目標題 -->
+        <div id="models${index}">
+            <canvas height="300" id="cv${index}" style="border: 1px solid;" width="400"></canvas>
+        </div>
 
-function getOptions1(){
-    var mc = document.getElementById("mdlClr1").value;
-    var bc1 = document.getElementById("bckClr1_1").value;
-    var bc2 = document.getElementById("bckClr1_2").value;
-    var ren = document.getElementById("render1").value;
-    var def = document.getElementById("defini1").value;
-    return {ModelColor: mc, BackgroundColor1: bc1, BackgroundColor2: bc2, RenderMode: ren, Definition: def};
+        <div style="width: 400px; height: 70px; border: 1px solid; margin-bottom: 20px;">
+            Model Color:<input id="mdlClr${index}" onchange="changeOption${index}('ModelColor',this.value)" style="margin-right: 50px;" type="color" value="#00ff40">
+            Back Color1:<input id="bckClr${index}_1" onchange="changeOption${index}('BackgroundColor1',this.value)" style="margin-right: 50px;" type="color">
+            Back Color2:<input id="bckClr${index}_2" onchange="changeOption${index}('BackgroundColor2',this.value)" type="color"><br>
+            Render Mode:<select id="render${index}" onchange="changeOption${index}('RenderMode',this.value)">
+                <option>Flat</option>
+                <option>Point</option>
+                <option>Wireframe</option>
+                <option>Smooth</option>
+            </select>
+            Definition:<select id="defini${index}" onchange="changeOption${index}('Definition',this.value)">
+                <option>Standard</option>
+                <option>low</option>
+                <option>high</option>
+            </select>
+        </div>
+        
+        <div id="videoPlaceholder${index}" style="margin-bottom: 20px;">
+            <iframe width="560" height="315" src="${ytUrl}" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+        </div>
+    `;
+    document.getElementById('modelParts1').appendChild(modelPartDiv);
+
+    // 初始化觀察者和選項
+    window[`viewer${index}`] = null;
+
+    // 獲取選項的函數
+    window[`getOptions${index}`] = function() {
+        var mc = document.getElementById(`mdlClr${index}`).value;
+        var bc1 = document.getElementById(`bckClr${index}_1`).value;
+        var bc2 = document.getElementById(`bckClr${index}_2`).value;
+        var ren = document.getElementById(`render${index}`).value;
+        var def = document.getElementById(`defini${index}`).value;
+        return {ModelColor: mc, BackgroundColor1: bc1, BackgroundColor2: bc2, RenderMode: ren, Definition: def};
+    };
+
+    window[`readSTLfile${index}`] = function(opt, canvasId) {
+        var canvas = document.getElementById(canvasId);
+        window[`viewer${index}`] = new JSC3D.Viewer(canvas);
+        window[`viewer${index}`].setParameter('SceneUrl', opt.SceneUrl);
+        window[`viewer${index}`].setParameter('InitRotationX', 0);
+        window[`viewer${index}`].setParameter('InitRotationY', 0);
+        window[`viewer${index}`].setParameter('InitRotationZ', 0);
+        window[`viewer${index}`].setParameter('ModelColor', opt.ModelColor);
+        window[`viewer${index}`].setParameter('BackgroundColor1', opt.BackgroundColor1);
+        window[`viewer${index}`].setParameter('BackgroundColor2', opt.BackgroundColor2);
+        window[`viewer${index}`].setParameter('RenderMode', opt.RenderMode);
+        window[`viewer${index}`].setParameter('Definition', opt.Definition);
+        window[`viewer${index}`].init();
+        window[`viewer${index}`].update();
+    };
+
+    window[`changeOption${index}`] = function(strOpt, strValue) {
+        console.log(`PART ${index} change ` + strOpt + " to " + strValue);
+        window[`viewer${index}`].setParameter(strOpt, strValue);
+        window[`viewer${index}`].init();
+        window[`viewer${index}`].update();
+    };
+
+    window[`openByGet${index}`] = function() {
+        var opt = window[`getOptions${index}`]();
+        opt.SceneUrl = url;
+        window[`readSTLfile${index}`](opt, `cv${index}`);
+    };
+
+    window[`openByGet${index}`]();  // 加載模型
 }
 
-function readSTLfile1(opt, canvasId){
-    var canvas = document.getElementById(canvasId);
-    viewer1 = new JSC3D.Viewer(canvas);
-    viewer1.setParameter('SceneUrl', opt.SceneUrl);
-    viewer1.setParameter('InitRotationX', 0);
-    viewer1.setParameter('InitRotationY', 0);
-    viewer1.setParameter('InitRotationZ', 0);
-    viewer1.setParameter('ModelColor', opt.ModelColor);
-    viewer1.setParameter('BackgroundColor1', opt.BackgroundColor1);
-    viewer1.setParameter('BackgroundColor2', opt.BackgroundColor2);
-    viewer1.setParameter('RenderMode', opt.RenderMode);
-    viewer1.setParameter('Definition', opt.Definition);
-    viewer1.init();
-    viewer1.update();
+function initModelParts() {
+    var links = document.querySelectorAll('#modelLinks1 a');
+    var ytLinks = [
+        'https://www.youtube.com/embed/r8UurR8XOkM', // 測試題的影片
+        'https://www.youtube.com/embed/KkipAeVs4Sw', // 第一題的影片
+        'https://www.youtube.com/embed/dSXBk1qFFjs' ,  // 第二題的影片
+        'https://www.youtube.com/embed/2sHDIOemkiU', // 第三題的影片
+    ];
+    
+    var titles = ['測試題', '第一題', '第二題','第三題', ]; // 題目標題
+    
+    links.forEach(function(link, index) {
+        createModelPart(index + 1, link.href, ytLinks[index % ytLinks.length], titles[index]); // 將標題傳遞進去
+    });
 }
 
-function changeOption1(strOpt, strValue){
-    console.log("PART 1 change " + strOpt + " to " + strValue);
-    viewer1.setParameter(strOpt, strValue);
-    viewer1.init();
-    viewer1.update();
-}
-
-function openByGet1(){
-    var url = "https://s104.cycu.org/~41223122/41223122_part2.stl";
-    var opt = getOptions1();
-    opt.SceneUrl = url;
-    readSTLfile1(opt, 'cv1');
-}
-
-openByGet1();
-</script>
-<p></p>
-<p>第一題</p>
-<script src="./../cmsimde/static/jsc3d.js" type="text/javascript"></script>
-<div id="models2"><canvas height="300" id="cv2" style="border: 1px solid;" width="400"></canvas></div>
-<div style="width: 400px; height: 70px; border: 1px solid; margin-bottom: 20px;"><!-- 調整 margin-bottom --> Model Color:<input id="mdlClr2" onchange="changeOption2('ModelColor',this.value)" style="margin-right: 50px;" type="color" value="#00ff40"/> <!-- 初始綠色 --> Back Color1:<input id="bckClr2_1" onchange="changeOption2('BackgroundColor1',this.value)" style="margin-right: 50px;" type="color"/> Back Color2:<input id="bckClr2_2" onchange="changeOption2('BackgroundColor2',this.value)" type="color"/><br/> Render Mode:<select id="render2" onchange="changeOption2('RenderMode',this.value)">
-<option>Flat</option>
-<option>Point</option>
-<option>Wireframe</option>
-<option>Smooth</option>
-</select>Definition:<select id="defini2" onchange="changeOption2('Definition',this.value)">
-<option>Standard</option>
-<option>low</option>
-<option>high</option>
-</select></div>
-<script type="text/javascript">
-// PART 2 的變數和函數
-var viewer2;
-
-function getOptions2(){
-    var mc = document.getElementById("mdlClr2").value;
-    var bc1 = document.getElementById("bckClr2_1").value;
-    var bc2 = document.getElementById("bckClr2_2").value;
-    var ren = document.getElementById("render2").value;
-    var def = document.getElementById("defini2").value;
-    return {ModelColor: mc, BackgroundColor1: bc1, BackgroundColor2: bc2, RenderMode: ren, Definition: def};
-}
-
-function readSTLfile2(opt, canvasId){
-    var canvas = document.getElementById(canvasId);
-    viewer2 = new JSC3D.Viewer(canvas);
-    viewer2.setParameter('SceneUrl', opt.SceneUrl);
-    viewer2.setParameter('InitRotationX', 0);
-    viewer2.setParameter('InitRotationY', 0);
-    viewer2.setParameter('InitRotationZ', 0);
-    viewer2.setParameter('ModelColor', opt.ModelColor);
-    viewer2.setParameter('BackgroundColor1', opt.BackgroundColor1);
-    viewer2.setParameter('BackgroundColor2', opt.BackgroundColor2);
-    viewer2.setParameter('RenderMode', opt.RenderMode);
-    viewer2.setParameter('Definition', opt.Definition);
-    viewer2.init();
-    viewer2.update();
-}
-
-function changeOption2(strOpt, strValue){
-    console.log("PART 2 change " + strOpt + " to " + strValue);
-    viewer2.setParameter(strOpt, strValue);
-    viewer2.init();
-    viewer2.update();
-}
-
-function openByGet2(){
-    var url = "https://s104.cycu.org/~41223122/41223122_part4.stl";
-    var opt = getOptions2();
-    opt.SceneUrl = url;
-    readSTLfile2(opt, 'cv2');
-}
-
-openByGet2();
-</script>
-<p></p>
-<p><iframe allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen="allowfullscreen" frameborder="0" height="315" referrerpolicy="strict-origin-when-cross-origin" src="https://www.youtube.com/embed/KkipAeVs4Sw?si=RnNNfRy1SAnBnJx7" title="YouTube video player" width="560"></iframe></p>
-<p></p>
-<p>檔案下載:<a href="./../downloads/41223122_part4.stl">/downloads/41223122_part4.stl</a></p>
-<p></p>
-<p>第二題</p>
-<script src="./../cmsimde/static/jsc3d.js" type="text/javascript"></script>
-<div id="models3"><canvas height="300" id="cv3" style="border: 1px solid;" width="400"></canvas></div>
-<div style="width: 400px; height: 70px; border: 1px solid; margin-bottom: 20px;"><!-- 調整 margin-bottom --> Model Color:<input id="mdlClr3" onchange="changeOption3('ModelColor',this.value)" style="margin-right: 50px;" type="color" value="#00ff40"/> <!-- 初始綠色 --> Back Color1:<input id="bckClr3_1" onchange="changeOption3('BackgroundColor1',this.value)" style="margin-right: 50px;" type="color"/> Back Color2:<input id="bckClr3_2" onchange="changeOption3('BackgroundColor2',this.value)" type="color"/><br/> Render Mode:<select id="render3" onchange="changeOption3('RenderMode',this.value)">
-<option>Flat</option>
-<option>Point</option>
-<option>Wireframe</option>
-<option>Smooth</option>
-</select>Definition:<select id="defini3" onchange="changeOption3('Definition',this.value)">
-<option>Standard</option>
-<option>low</option>
-<option>high</option>
-</select></div>
-<script type="text/javascript">
-// PART 3 的變數和函數
-var viewer3;
-
-function getOptions3(){
-    var mc = document.getElementById("mdlClr3").value;
-    var bc1 = document.getElementById("bckClr3_1").value;
-    var bc2 = document.getElementById("bckClr3_2").value;
-    var ren = document.getElementById("render3").value;
-    var def = document.getElementById("defini3").value;
-    return {ModelColor: mc, BackgroundColor1: bc1, BackgroundColor2: bc2, RenderMode: ren, Definition: def};
-}
-
-function readSTLfile3(opt, canvasId){
-    var canvas = document.getElementById(canvasId);
-    viewer3 = new JSC3D.Viewer(canvas);
-    viewer3.setParameter('SceneUrl', opt.SceneUrl);
-    viewer3.setParameter('InitRotationX', 0);
-    viewer3.setParameter('InitRotationY', 0);
-    viewer3.setParameter('InitRotationZ', 0);
-    viewer3.setParameter('ModelColor', opt.ModelColor);
-    viewer3.setParameter('BackgroundColor1', opt.BackgroundColor1);
-    viewer3.setParameter('BackgroundColor2', opt.BackgroundColor2);
-    viewer3.setParameter('RenderMode', opt.RenderMode);
-    viewer3.setParameter('Definition', opt.Definition);
-    viewer3.init();
-    viewer3.update();
-}
-
-function changeOption3(strOpt, strValue){
-    console.log("PART 3 change " + strOpt + " to " + strValue);
-    viewer3.setParameter(strOpt, strValue);
-    viewer3.init();
-    viewer3.update();
-}
-
-function openByGet3(){
-    var url = "https://s104.cycu.org/~41223122/41223122_part5.stl";
-    var opt = getOptions3();
-    opt.SceneUrl = url;
-    readSTLfile3(opt, 'cv3');
-}
-
-openByGet3();
-</script>
-<p></p>
-<p><iframe allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen="allowfullscreen" frameborder="0" height="315" referrerpolicy="strict-origin-when-cross-origin" src="https://www.youtube.com/embed/dSXBk1qFFjs?si=pehzsj3mw648Si4a" title="YouTube video player" width="560"></iframe></p>
-<p></p>
-<p>檔案下載:<a href="./../downloads/41223122_part5.stl">/downloads/41223122_part5.stl</a></p><br />W3 << <a href='W3.html'>Previous</a> <a href='HW1.html'>Next</a> >> HW1</div>
+window.onload = initModelParts;  // 頁面加載時初始化所有模型
+</script><br />W3 << <a href='W3.html'>Previous</a> <a href='HW1.html'>Next</a> >> HW1</div>
         
     <!-- footer -->
       <div class="container">
